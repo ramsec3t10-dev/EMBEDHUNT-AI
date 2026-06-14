@@ -1,0 +1,174 @@
+version: "3.9"
+
+# EMBEDHUNT AI — Docker Compose Stack
+# Phase A: Foundation (Backend + DB + Cache)
+#
+# Usage:
+#   docker-compose up --build          # Start all services
+#   docker-compose up db redis         # Start only infrastructure
+#   docker-compose logs -f backend     # Stream backend logs
+
+services:
+
+  # ─── Backend ────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: embedhunt_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      - DEBUG=true
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production-min-32-chars}
+      - DATABASE_URL=postgresql+asyncpg://embedhunt:embedhunt@db:5432/embedhunt
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+      - LOG_FORMAT=text
+      - LOG_LEVEL=DEBUG
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+    networks:
+      - embedhunt_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ─── Celery Worker ──────────────────────────────────────────────────────────
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: embedhunt_celery
+    command: celery -A app.core.celery worker --loglevel=info --concurrency=4
+    environment:
+      - APP_ENV=development
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production-min-32-chars}
+      - DATABASE_URL=postgresql+asyncpg://embedhunt:embedhunt@db:5432/embedhunt
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      - backend
+      - redis
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+    networks:
+      - embedhunt_network
+    profiles:
+      - workers  # Only start with: docker-compose --profile workers up
+
+  # ─── PostgreSQL ─────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: embedhunt_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: embedhunt
+      POSTGRES_PASSWORD: embedhunt
+      POSTGRES_DB: embedhunt
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/seeds:/docker-entrypoint-initdb.d  # Auto-run seed scripts
+    restart: unless-stopped
+    networks:
+      - embedhunt_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U embedhunt -d embedhunt"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis ──────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: embedhunt_redis
+    ports:
+      - "6379:6379"
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - embedhunt_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── ChromaDB (Vector Store — Phase C) ──────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: embedhunt_chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    restart: unless-stopped
+    networks:
+      - embedhunt_network
+    profiles:
+      - ai  # Only start with: docker-compose --profile ai up
+
+  # ─── MinIO (Object Storage) ──────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: embedhunt_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: embedhunt
+      MINIO_ROOT_PASSWORD: embedhunt123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+    networks:
+      - embedhunt_network
+    profiles:
+      - storage  # Only start with: docker-compose --profile storage up
+
+  # ─── pgAdmin (Dev convenience) ──────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: embedhunt_pgadmin
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@embedhunt.ai
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: unless-stopped
+    networks:
+      - embedhunt_network
+    depends_on:
+      - db
+    profiles:
+      - dev  # Only start with: docker-compose --profile dev up
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:
+  redis_data:
+  chroma_data:
+  minio_data:
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  embedhunt_network:
+    driver: bridge
