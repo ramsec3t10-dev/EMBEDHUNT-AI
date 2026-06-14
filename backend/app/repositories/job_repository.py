@@ -12,8 +12,11 @@ from app.models.job_ingestion import (
     JobListing,
     JobListingStatus,
     JobMatch,
+    JobScanRun,
+    ScanRunStatus,
 )
 from app.schemas.jobs import CompanyWatchlistCreate, ManualJobListingCreate
+from app.services.job_connectors import ExternalJob
 from app.services.job_scoring import estimate_salary_lpa, score_job
 
 
@@ -40,6 +43,74 @@ class JobRepository:
             .order_by(CompanyWatchlist.priority.asc(), CompanyWatchlist.company_name.asc())
         )
         return list(result.scalars().all())
+
+    async def create_scan_run(
+        self,
+        source_name: str,
+        source_id: str | None = None,
+    ) -> JobScanRun:
+        run = JobScanRun(
+            source_id=source_id,
+            source_name=source_name,
+            status=ScanRunStatus.RUNNING,
+        )
+        self.db.add(run)
+        await self.db.flush()
+        await self.db.refresh(run)
+        return run
+
+    async def finish_scan_run(
+        self,
+        run_id: str,
+        status: ScanRunStatus,
+        jobs_found: int,
+        jobs_imported: int,
+        error_message: str | None = None,
+    ) -> JobScanRun | None:
+        result = await self.db.execute(select(JobScanRun).where(JobScanRun.id == run_id))
+        run = result.scalar_one_or_none()
+        if not run:
+            return None
+
+        run.status = status
+        run.jobs_found = jobs_found
+        run.jobs_imported = jobs_imported
+        run.error_message = error_message
+        await self.db.flush()
+        await self.db.refresh(run)
+        return run
+
+    async def upsert_external_listing(self, job: ExternalJob) -> tuple[JobListing, bool]:
+        result = await self.db.execute(
+            select(JobListing).where(
+                JobListing.source_name == job.source_name,
+                JobListing.source_job_id == job.source_job_id,
+            )
+        )
+        listing = result.scalar_one_or_none()
+        created = listing is None
+
+        if listing is None:
+            listing = JobListing(
+                source_name=job.source_name,
+                source_job_id=job.source_job_id,
+                status=JobListingStatus.NEW,
+            )
+            self.db.add(listing)
+
+        listing.source_url = job.source_url
+        listing.company_name = job.company_name
+        listing.title = job.title
+        listing.location = job.location
+        listing.work_mode = job.work_mode
+        listing.salary_min_lpa = job.salary_min_lpa
+        listing.salary_max_lpa = job.salary_max_lpa
+        listing.description = job.description
+        listing.required_skills = job.required_skills
+
+        await self.db.flush()
+        await self.db.refresh(listing)
+        return listing, created
 
     async def blacklist_company(
         self,

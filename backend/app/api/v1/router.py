@@ -1,5 +1,7 @@
 """EMBEDHUNT AI — API v1 Router"""
+
 from fastapi import APIRouter
+
 from app.api.v1.endpoints import auth, jobs
 
 api_router = APIRouter()

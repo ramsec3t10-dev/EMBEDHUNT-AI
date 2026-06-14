@@ -1,0 +1,66 @@
+-- Initial source and company watchlist seed data.
+-- Safe to run more than once.
+
+INSERT INTO job_sources (id, name, kind, status, base_url)
+VALUES
+  ('00000000-0000-0000-0000-000000000101', 'Naukri', 'JOB_BOARD', 'ACTIVE', 'https://www.naukri.com'),
+  ('00000000-0000-0000-0000-000000000102', 'LinkedIn', 'JOB_BOARD', 'ACTIVE', 'https://www.linkedin.com/jobs'),
+  ('00000000-0000-0000-0000-000000000103', 'Indeed', 'JOB_BOARD', 'ACTIVE', 'https://www.indeed.com'),
+  ('00000000-0000-0000-0000-000000000104', 'Instahyre', 'JOB_BOARD', 'ACTIVE', 'https://www.instahyre.com'),
+  ('00000000-0000-0000-0000-000000000105', 'Cutshort', 'JOB_BOARD', 'ACTIVE', 'https://cutshort.io'),
+  ('00000000-0000-0000-0000-000000000106', 'Wellfound', 'JOB_BOARD', 'ACTIVE', 'https://wellfound.com/jobs'),
+  ('00000000-0000-0000-0000-000000000107', 'Glassdoor', 'JOB_BOARD', 'ACTIVE', 'https://www.glassdoor.com'),
+  ('00000000-0000-0000-0000-000000000108', 'ZipRecruiter', 'JOB_BOARD', 'ACTIVE', 'https://www.ziprecruiter.com'),
+  ('00000000-0000-0000-0000-000000000109', 'Foundit', 'JOB_BOARD', 'ACTIVE', 'https://www.foundit.in'),
+  ('00000000-0000-0000-0000-000000000110', 'Hirect', 'JOB_BOARD', 'ACTIVE', 'https://www.hirect.in'),
+  ('00000000-0000-0000-0000-000000000111', 'Hirist', 'JOB_BOARD', 'ACTIVE', 'https://www.hirist.com'),
+  ('00000000-0000-0000-0000-000000000112', 'Y Combinator Jobs', 'JOB_BOARD', 'ACTIVE', 'https://www.ycombinator.com/jobs')
+ON CONFLICT (name) DO NOTHING;
+
+INSERT INTO company_watchlist (id, company_name, careers_url, is_active, priority, tags)
+VALUES
+  ('00000000-0000-0000-0000-000000000201', 'NVIDIA', 'https://www.nvidia.com/en-us/about-nvidia/careers/', true, 10, 'semiconductor,gpu,embedded'),
+  ('00000000-0000-0000-0000-000000000202', 'Intel', 'https://jobs.intel.com/', true, 10, 'semiconductor,firmware'),
+  ('00000000-0000-0000-0000-000000000203', 'Qualcomm', 'https://careers.qualcomm.com/', true, 10, 'semiconductor,wireless,embedded'),
+  ('00000000-0000-0000-0000-000000000204', 'AMD', 'https://careers.amd.com/', true, 15, 'semiconductor,systems'),
+  ('00000000-0000-0000-0000-000000000205', 'NXP', 'https://www.nxp.com/company/about-nxp/careers:CAREERS', true, 15, 'automotive,semiconductor'),
+  ('00000000-0000-0000-0000-000000000206', 'Infineon', 'https://www.infineon.com/cms/en/careers/', true, 15, 'automotive,semiconductor'),
+  ('00000000-0000-0000-0000-000000000207', 'Texas Instruments', 'https://careers.ti.com/', true, 15, 'semiconductor,analog'),
+  ('00000000-0000-0000-0000-000000000208', 'Bosch', 'https://www.bosch.com/careers/', true, 20, 'automotive,embedded'),
+  ('00000000-0000-0000-0000-000000000209', 'Continental', 'https://www.continental.com/en/career/', true, 20, 'automotive,embedded'),
+  ('00000000-0000-0000-0000-000000000210', 'ZF', 'https://jobs.zf.com/', true, 20, 'automotive,embedded'),
+  ('00000000-0000-0000-0000-000000000211', 'Valeo', 'https://www.valeo.com/en/career/', true, 20, 'automotive'),
+  ('00000000-0000-0000-0000-000000000212', 'Aptiv', 'https://www.aptiv.com/careers', true, 20, 'automotive'),
+  ('00000000-0000-0000-0000-000000000213', 'Magna', 'https://www.magna.com/careers', true, 30, 'automotive'),
+  ('00000000-0000-0000-0000-000000000214', 'Harman', 'https://jobs.harman.com/', true, 25, 'automotive,audio,embedded'),
+  ('00000000-0000-0000-0000-000000000215', 'Siemens', 'https://jobs.siemens.com/', true, 30, 'industrial,automation'),
+  ('00000000-0000-0000-0000-000000000216', 'Honeywell', 'https://careers.honeywell.com/', true, 30, 'industrial,aerospace'),
+  ('00000000-0000-0000-0000-000000000217', 'GE', 'https://jobs.gecareers.com/', true, 35, 'industrial'),
+  ('00000000-0000-0000-0000-000000000218', 'Cisco', 'https://jobs.cisco.com/', true, 35, 'networking,systems'),
+  ('00000000-0000-0000-0000-000000000219', 'Broadcom', 'https://www.broadcom.com/company/careers', true, 20, 'semiconductor,networking'),
+  ('00000000-0000-0000-0000-000000000220', 'Marvell', 'https://www.marvell.com/company/careers.html', true, 25, 'semiconductor,networking'),
+  ('00000000-0000-0000-0000-000000000221', 'Western Digital', 'https://jobs.westerndigital.com/', true, 35, 'storage,firmware'),
+  ('00000000-0000-0000-0000-000000000222', 'Micron', 'https://www.micron.com/careers', true, 30, 'memory,semiconductor'),
+  ('00000000-0000-0000-0000-000000000223', 'Samsung', 'https://www.samsung.com/global/careers/', true, 25, 'consumer,semiconductor'),
+  ('00000000-0000-0000-0000-000000000224', 'LG', 'https://www.lg.com/global/careers', true, 40, 'consumer,embedded'),
+  ('00000000-0000-0000-0000-000000000225', 'Sony', 'https://www.sonyjobs.com/', true, 35, 'consumer,embedded'),
+  ('00000000-0000-0000-0000-000000000226', 'MediaTek', 'https://www.mediatek.com/careers', true, 20, 'semiconductor,wireless'),
+  ('00000000-0000-0000-0000-000000000227', 'Renesas', 'https://www.renesas.com/us/en/about/careers', true, 25, 'automotive,semiconductor'),
+  ('00000000-0000-0000-0000-000000000228', 'STMicroelectronics', 'https://stmicroelectronics.eightfold.ai/careers', true, 25, 'semiconductor,embedded'),
+  ('00000000-0000-0000-0000-000000000229', 'Analog Devices', 'https://www.analog.com/en/about-adi/careers.html', true, 25, 'analog,semiconductor'),
+  ('00000000-0000-0000-0000-000000000230', 'Microchip', 'https://www.microchip.com/en-us/about/careers', true, 25, 'microcontroller,embedded'),
+  ('00000000-0000-0000-0000-000000000231', 'Schneider Electric', 'https://www.se.com/ww/en/about-us/careers/overview.jsp', true, 35, 'industrial,automation'),
+  ('00000000-0000-0000-0000-000000000232', 'Eaton', 'https://www.eaton.com/us/en-us/company/careers.html', true, 40, 'industrial,power'),
+  ('00000000-0000-0000-0000-000000000233', 'ABB', 'https://careers.abb/global/en', true, 35, 'industrial,automation'),
+  ('00000000-0000-0000-0000-000000000234', 'Emerson', 'https://www.emerson.com/en-us/careers', true, 40, 'industrial,automation'),
+  ('00000000-0000-0000-0000-000000000235', 'Philips', 'https://www.careers.philips.com/', true, 40, 'medical,embedded'),
+  ('00000000-0000-0000-0000-000000000236', 'Dell', 'https://jobs.dell.com/', true, 35, 'systems,hardware'),
+  ('00000000-0000-0000-0000-000000000237', 'HP', 'https://jobs.hp.com/', true, 35, 'systems,hardware'),
+  ('00000000-0000-0000-0000-000000000238', 'Amazon Devices', 'https://www.amazon.jobs/', true, 15, 'consumer,devices,embedded'),
+  ('00000000-0000-0000-0000-000000000239', 'Apple', 'https://jobs.apple.com/', true, 15, 'consumer,devices,embedded'),
+  ('00000000-0000-0000-0000-000000000240', 'Google', 'https://www.google.com/about/careers/applications/', true, 15, 'devices,systems'),
+  ('00000000-0000-0000-0000-000000000241', 'Meta', 'https://www.metacareers.com/', true, 25, 'devices,systems'),
+  ('00000000-0000-0000-0000-000000000242', 'Tesla', 'https://www.tesla.com/careers', true, 15, 'automotive,embedded'),
+  ('00000000-0000-0000-0000-000000000243', 'Lucid', 'https://lucidmotors.com/careers', true, 20, 'automotive,embedded'),
+  ('00000000-0000-0000-0000-000000000244', 'Rivian', 'https://rivian.com/careers', true, 20, 'automotive,embedded')
+ON CONFLICT (id) DO NOTHING;

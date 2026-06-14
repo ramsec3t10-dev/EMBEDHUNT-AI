@@ -9,15 +9,15 @@ Handles all authentication and authorization:
 - Token blacklisting via Redis
 """
 
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Any
-from enum import Enum
 import uuid
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from typing import Any, Optional
 
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -45,6 +45,7 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 # ─── Roles ────────────────────────────────────────────────────────────────────
 
+
 class UserRole(str, Enum):
     CANDIDATE = "candidate"
     RECRUITER = "recruiter"
@@ -61,6 +62,7 @@ ROLE_HIERARCHY = {
 
 
 # ─── JWT Tokens ───────────────────────────────────────────────────────────────
+
 
 class TokenType(str, Enum):
     ACCESS = "access"
@@ -81,10 +83,10 @@ def _create_token(
     """
     now = datetime.now(timezone.utc)
     payload = {
-        "sub": subject,            # Subject (user ID)
+        "sub": subject,  # Subject (user ID)
         "type": token_type.value,  # Token type guard
-        "iat": now,                # Issued at
-        "exp": now + expires_delta,# Expiry
+        "iat": now,  # Issued at
+        "exp": now + expires_delta,  # Expiry
         "jti": str(uuid.uuid4()),  # JWT ID (for revocation)
     }
     if extra_claims:
@@ -152,7 +154,9 @@ def decode_token(token: str, expected_type: TokenType) -> dict[str, Any]:
 
         # Type guard — prevent token type confusion attacks
         if payload.get("type") != expected_type.value:
-            logger.warning("token_type_mismatch", expected=expected_type.value, got=payload.get("type"))
+            logger.warning(
+                "token_type_mismatch", expected=expected_type.value, got=payload.get("type")
+            )
             raise credentials_exception
 
         if payload.get("sub") is None:
@@ -199,6 +203,7 @@ def require_role(*allowed_roles: UserRole):
     Usage:
         @router.get("/admin", dependencies=[Depends(require_role(UserRole.PLATFORM_ADMIN))])
     """
+
     async def _check(role: UserRole = Depends(get_current_user_role)):
         if role not in allowed_roles:
             raise HTTPException(
@@ -206,6 +211,7 @@ def require_role(*allowed_roles: UserRole):
                 detail=f"Access denied. Required roles: {[r.value for r in allowed_roles]}",
             )
         return role
+
     return _check
 
 
@@ -216,6 +222,7 @@ def require_min_role(min_role: UserRole):
     Usage:
         @router.get("/", dependencies=[Depends(require_min_role(UserRole.RECRUITER))])
     """
+
     async def _check(role: UserRole = Depends(get_current_user_role)):
         if ROLE_HIERARCHY.get(role, 0) < ROLE_HIERARCHY.get(min_role, 0):
             raise HTTPException(
@@ -223,4 +230,5 @@ def require_min_role(min_role: UserRole):
                 detail=f"Insufficient permissions. Minimum role required: {min_role.value}",
             )
         return role
+
     return _check

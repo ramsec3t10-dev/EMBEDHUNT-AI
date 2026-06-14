@@ -185,7 +185,10 @@ Every state transition should be auditable.
 
 ## Delivery Phases
 
-### Phase 0: Stabilize Foundation
+The canonical build sequence is maintained in [PHASE_PLAN.md](PHASE_PLAN.md). The summary below is kept aligned with
+that phase plan.
+
+### Phase 1: Backend Foundation
 
 - Fix text encoding corruption across docs and comments.
 - Repair CI and local test setup.
@@ -193,38 +196,61 @@ Every state transition should be auditable.
 - Add missing Celery app or remove the worker until implemented.
 - Remove unsafe default secrets from production paths.
 
-### Phase 1: Job Data Backbone
+### Phase 2: Resume Intelligence Pipeline
+
+- Resume upload.
+- File storage.
+- PDF/text parsing.
+- Text normalization.
+- Skill extraction.
+- Experience extraction.
+- AI profile builder.
+
+### Phase 3: Matching and Explainable Ranking
+
+- AI profile matching.
+- User skills to job requirements matching.
+- Score calculator.
+- Explainable AI.
+- Ranked jobs.
+
+### Phase 4: Flutter Android Product
+
+- Splash.
+- Login.
+- Dashboard.
+- Recommendations.
+- Profile.
+- Job details.
+- Career roadmap.
+- Application queue.
+
+### Phase 5: Career Growth Intelligence
+
+- Missing skills.
+- Learning planner.
+- Interview engine.
+- Company intelligence.
+- Career roadmap.
+
+### Phase 6: Productionization and Release
+
+- Flutter app integration.
+- REST API hardening.
+- Background scheduler.
+- PostgreSQL operations.
+- Notification engine.
+- Monitoring and logs.
+- Release APK.
+
+## Immediate Next Slice
+
+Continue Phase 1 to completion:
 
 - Add source, company, job scan, blacklist, and job match models.
 - Add CRUD APIs for configured companies and search preferences.
 - Add a connector interface with a mock connector for tests.
 - Add scheduled ingestion through Celery.
-
-### Phase 2: Matching MVP
-
-- Add candidate profile and resume selection APIs.
-- Implement deterministic scoring first.
-- Add AI embedding scoring behind a feature flag.
-- Store match explanations and score components.
-
-### Phase 3: Android MVP
-
-- Build dashboard, new jobs, approval actions, blacklist, and history.
-- Use backend APIs only; avoid business logic duplication in the app.
-- Add push notification hooks after the workflow is stable.
-
-### Phase 4: Source Expansion
-
-- Add high-value connectors one by one.
-- Track source reliability, latency, duplicates, and failure rates.
-- Add admin controls to disable noisy sources.
-
-### Phase 5: Application Assistant
-
-- Generate cover letters.
-- Prepare application packets.
-- Add manual approval gate.
-- Add browser automation only where compliant and user-authorized.
 
 ## Engineering Principles
 
@@ -235,12 +261,8 @@ Every state transition should be auditable.
 - Do not auto-submit applications without explicit user approval.
 - Prefer boring, observable backend systems over clever hidden automation.
 
-## Immediate Next Slice
-
-The next useful implementation slice is the job ingestion foundation:
-
-1. Create models for `JobSource`, `CompanyWatchlist`, `JobScanRun`, `JobListing`, `JobMatch`, and `CompanyBlacklist`.
-2. Add Alembic migration support.
-3. Add a connector interface plus one mock connector.
-4. Add an API endpoint to list new matched jobs for the dashboard.
-5. Add tests that run in CI without hitting external job sites.
+1. Run the Docker stack against PostgreSQL.
+2. Apply migrations online.
+3. Add CI migration smoke test.
+4. Add scan-run ingestion service.
+5. Add one compliant real connector after the mock connector.

@@ -7,12 +7,13 @@ Pydantic v2 schemas for authentication request/response validation.
 
 import re
 from typing import Optional
-from pydantic import BaseModel, EmailStr, field_validator, model_validator, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from app.core.security import UserRole
 
-
 # ─── Request Schemas ──────────────────────────────────────────────────────────
+
 
 class RegisterRequest(BaseModel):
     email: EmailStr
@@ -87,6 +88,7 @@ class VerifyEmailRequest(BaseModel):
 
 # ─── Response Schemas ─────────────────────────────────────────────────────────
 
+
 class TokenResponse(BaseModel):
     access_token: str
     refresh_token: str
@@ -116,6 +118,7 @@ class UserResponse(BaseModel):
 
 class AuthResponse(BaseModel):
     """Combined auth + user response returned on login/register."""
+
     tokens: TokenResponse
     user: UserResponse
     message: str = "Authentication successful"
@@ -123,5 +126,6 @@ class AuthResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     """Generic success message response."""
+
     message: str
     success: bool = True

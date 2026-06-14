@@ -8,7 +8,8 @@ Every config value is typed, validated, and documented.
 
 from functools import lru_cache
 from typing import List, Optional
-from pydantic import field_validator, PostgresDsn, RedisDsn, AnyHttpUrl
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

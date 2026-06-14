@@ -4,7 +4,12 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.models.job_ingestion import JobDecision, JobSourceKind, JobSourceStatus
+from app.models.job_ingestion import (
+    JobDecision,
+    JobSourceKind,
+    JobSourceStatus,
+    ScanRunStatus,
+)
 
 
 class JobSourceResponse(BaseModel):
@@ -81,6 +86,18 @@ class JobListingResponse(BaseModel):
     salary_max_lpa: Optional[float] = None
     currency: str
     required_skills: Optional[str] = None
+
+
+class JobScanRunResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    source_id: Optional[str] = None
+    source_name: str
+    status: ScanRunStatus
+    jobs_found: int
+    jobs_imported: int
+    error_message: Optional[str] = None
 
 
 class JobMatchDecisionRequest(BaseModel):

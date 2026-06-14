@@ -6,10 +6,13 @@ Embedded-software-specific job model.
 Fields designed around the Qualcomm/Bosch/NXP/Continental job taxonomy.
 """
 
-from typing import Optional
-from sqlalchemy import String, Boolean, Text, Integer, Float, Enum as SAEnum
-from sqlalchemy.orm import Mapped, mapped_column
 from enum import Enum
+from typing import Optional
+
+from sqlalchemy import Boolean
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Float, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import BaseModel
 
@@ -31,10 +34,10 @@ class JobStatus(str, Enum):
 
 
 class ExperienceLevel(str, Enum):
-    ENTRY = "entry"          # 0-2 years
-    MID = "mid"              # 2-5 years
-    SENIOR = "senior"        # 5-10 years
-    LEAD = "lead"            # 8+ years
+    ENTRY = "entry"  # 0-2 years
+    MID = "mid"  # 2-5 years
+    SENIOR = "senior"  # 5-10 years
+    LEAD = "lead"  # 8+ years
     PRINCIPAL = "principal"  # 12+ years
 
 
@@ -87,20 +90,18 @@ class Job(BaseModel):
 
     # ─── Embedded-Specific ────────────────────────────────────────────────────
     required_skills: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True,
-        comment="Comma-separated: C, RTOS, CAN, AUTOSAR, Linux Kernel, etc."
+        Text, nullable=True, comment="Comma-separated: C, RTOS, CAN, AUTOSAR, Linux Kernel, etc."
     )
     embedded_domains: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True,
-        comment="Comma-separated: automotive, iot, medical, defense, semiconductor"
+        Text,
+        nullable=True,
+        comment="Comma-separated: automotive, iot, medical, defense, semiconductor",
     )
     protocols: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True,
-        comment="Comma-separated: CAN, LIN, SPI, I2C, Ethernet, etc."
+        Text, nullable=True, comment="Comma-separated: CAN, LIN, SPI, I2C, Ethernet, etc."
     )
     mcu_platforms: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True,
-        comment="Comma-separated: ARM Cortex-M, RISC-V, Snapdragon, etc."
+        Text, nullable=True, comment="Comma-separated: ARM Cortex-M, RISC-V, Snapdragon, etc."
     )
     years_of_experience_min: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     years_of_experience_max: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

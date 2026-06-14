@@ -15,6 +15,7 @@ import sys
 import uuid
 from contextvars import ContextVar
 from typing import Optional
+
 import structlog
 from structlog.types import EventDict, WrappedLogger
 
@@ -38,6 +39,7 @@ def set_correlation_id(correlation_id: Optional[str] = None) -> str:
 
 # ─── Custom Processors ────────────────────────────────────────────────────────
 
+
 def add_correlation_id(logger: WrappedLogger, method: str, event_dict: EventDict) -> EventDict:
     """Inject correlation ID into every log event."""
     event_dict["correlation_id"] = get_correlation_id()
@@ -59,6 +61,7 @@ def drop_color_message_key(logger: WrappedLogger, method: str, event_dict: Event
 
 
 # ─── Setup ────────────────────────────────────────────────────────────────────
+
 
 def setup_logging() -> None:
     """
@@ -125,6 +128,7 @@ def get_logger(name: str) -> structlog.BoundLogger:
 
 
 # ─── Audit Logger ─────────────────────────────────────────────────────────────
+
 
 class AuditLogger:
     """

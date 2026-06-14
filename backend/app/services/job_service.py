@@ -2,8 +2,9 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.job_ingestion import ScanRunStatus
 from app.repositories.job_repository import JobRepository
-from app.schemas.jobs import JobMatchCard, ManualJobListingCreate
+from app.schemas.jobs import JobMatchCard, JobScanRunResponse, ManualJobListingCreate
 from app.services.job_connectors import MockEmbeddedJobConnector
 from app.services.job_scoring import estimate_salary_lpa, score_job, split_keywords
 
@@ -75,3 +76,37 @@ class JobService:
                 )
             )
         return sorted(cards, key=lambda card: card.ai_score, reverse=True)
+
+    async def run_mock_scan(self) -> JobScanRunResponse:
+        connector = MockEmbeddedJobConnector()
+        run = await self.repo.create_scan_run(source_name=connector.source_name)
+        jobs_imported = 0
+
+        try:
+            jobs = await connector.fetch_jobs()
+            for job in jobs:
+                _, created = await self.repo.upsert_external_listing(job)
+                if created:
+                    jobs_imported += 1
+
+            finished = await self.repo.finish_scan_run(
+                run_id=run.id,
+                status=ScanRunStatus.SUCCEEDED,
+                jobs_found=len(jobs),
+                jobs_imported=jobs_imported,
+            )
+        except Exception as exc:
+            finished = await self.repo.finish_scan_run(
+                run_id=run.id,
+                status=ScanRunStatus.FAILED,
+                jobs_found=0,
+                jobs_imported=jobs_imported,
+                error_message=str(exc),
+            )
+            if finished is None:
+                raise
+
+        if finished is None:
+            raise RuntimeError("Scan run disappeared before completion")
+
+        return JobScanRunResponse.model_validate(finished)

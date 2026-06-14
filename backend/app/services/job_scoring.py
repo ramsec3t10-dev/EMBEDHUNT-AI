@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 
-
 DEFAULT_EMBEDDED_PROFILE_KEYWORDS = {
     "embedded",
     "firmware",

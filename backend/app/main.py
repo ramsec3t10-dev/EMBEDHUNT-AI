@@ -18,14 +18,14 @@ import uuid
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 
-from app.core.config import settings
-from app.core.logging import setup_logging, get_logger, set_correlation_id
 from app.api.v1.router import api_router
+from app.core.config import settings
+from app.core.logging import get_logger, set_correlation_id, setup_logging
 from app.db.session import check_db_connection
 
 # Initialize logging before anything else
@@ -34,6 +34,7 @@ logger = get_logger(__name__)
 
 
 # ─── Lifespan ─────────────────────────────────────────────────────────────────
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -59,6 +60,7 @@ async def lifespan(app: FastAPI):
 
 
 # ─── App Factory ──────────────────────────────────────────────────────────────
+
 
 def create_application() -> FastAPI:
     app = FastAPI(

@@ -3,12 +3,15 @@ EMBEDHUNT AI — User Model
 Phase A: Foundation
 """
 
-from typing import Optional, List
-from sqlalchemy import String, Boolean, Text, Enum as SAEnum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing import Optional
 
-from app.db.base import BaseModel
+from sqlalchemy import Boolean
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import String, Text
+from sqlalchemy.orm import Mapped, mapped_column
+
 from app.core.security import UserRole
+from app.db.base import BaseModel
 
 
 class User(BaseModel):

@@ -4,7 +4,8 @@ Phase A: Foundation
 """
 
 from typing import Optional
-from sqlalchemy import String, Boolean, Text, Integer
+
+from sqlalchemy import Boolean, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import BaseModel
@@ -37,8 +38,9 @@ class Company(BaseModel):
 
     # ─── Embedded-specific tags ───────────────────────────────────────────────
     domains: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True,
-        comment="Comma-separated: automotive, iot, medical, defense, semiconductor"
+        Text,
+        nullable=True,
+        comment="Comma-separated: automotive, iot, medical, defense, semiconductor",
     )
 
     def __repr__(self) -> str:

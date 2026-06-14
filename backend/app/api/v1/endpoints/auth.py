@@ -15,22 +15,22 @@ Endpoints:
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import get_current_user_id
 from app.db.session import get_db
-from app.core.security import get_current_user_id, get_token_payload
 from app.repositories.user_repository import UserRepository
-from app.services.auth_service import AuthService
 from app.schemas.auth import (
-    RegisterRequest,
-    LoginRequest,
-    RefreshTokenRequest,
-    ForgotPasswordRequest,
-    ResetPasswordRequest,
-    VerifyEmailRequest,
     AuthResponse,
+    ForgotPasswordRequest,
+    LoginRequest,
+    MessageResponse,
+    RefreshTokenRequest,
+    RegisterRequest,
+    ResetPasswordRequest,
     TokenResponse,
     UserResponse,
-    MessageResponse,
+    VerifyEmailRequest,
 )
+from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -133,5 +133,6 @@ async def get_me(
     user = await repo.get_by_id(user_id)
     if not user:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="User not found")
     return UserResponse.model_validate(user)

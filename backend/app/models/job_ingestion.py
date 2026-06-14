@@ -3,8 +3,9 @@
 from enum import Enum
 from typing import Optional
 
-from sqlalchemy import Boolean, Float, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean
 from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Float, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import BaseModel
@@ -75,7 +76,9 @@ class CompanyWatchlist(BaseModel):
 
 class CompanyBlacklist(BaseModel):
     __tablename__ = "company_blacklist"
-    __table_args__ = (UniqueConstraint("user_id", "company_name", name="uq_user_blacklisted_company"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "company_name", name="uq_user_blacklisted_company"),
+    )
 
     user_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
     company_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)

@@ -6,33 +6,31 @@ All authentication business logic lives here.
 Repository handles DB, service handles business rules, API handles HTTP.
 """
 
-from datetime import datetime, timezone, timedelta
-from typing import Optional
+from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
+from app.core.logging import audit_logger, get_logger
 from app.core.security import (
-    hash_password,
-    verify_password,
+    TokenType,
     create_access_token,
-    create_refresh_token,
     create_email_verify_token,
     create_password_reset_token,
+    create_refresh_token,
     decode_token,
-    TokenType,
-    UserRole,
+    hash_password,
+    verify_password,
 )
-from app.core.config import settings
-from app.core.logging import get_logger, audit_logger
 from app.repositories.user_repository import UserRepository
 from app.schemas.auth import (
-    RegisterRequest,
-    LoginRequest,
     AuthResponse,
+    LoginRequest,
+    MessageResponse,
+    RegisterRequest,
     TokenResponse,
     UserResponse,
-    MessageResponse,
 )
 
 logger = get_logger(__name__)
@@ -87,7 +85,9 @@ class AuthService:
         audit_logger.log("user_registered", user_id=user.id, role=user.role.value)
 
         # Issue tokens immediately (user can use app, but some features gated on verify)
-        return self._build_auth_response(user, message="Registration successful. Please verify your email.")
+        return self._build_auth_response(
+            user, message="Registration successful. Please verify your email."
+        )
 
     async def login(self, req: LoginRequest, client_ip: str = "unknown") -> AuthResponse:
         """Authenticate user. Enforces account lockout after repeated failures."""
@@ -114,10 +114,15 @@ class AuthService:
         if user.locked_until:
             locked_dt = datetime.fromisoformat(user.locked_until)
             if datetime.now(timezone.utc) < locked_dt:
-                minutes_left = int((locked_dt - datetime.now(timezone.utc)).total_seconds() / 60) + 1
+                minutes_left = (
+                    int((locked_dt - datetime.now(timezone.utc)).total_seconds() / 60) + 1
+                )
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail=f"Account locked due to too many failed attempts. Try again in {minutes_left} minutes.",
+                    detail=(
+                        "Account locked due to too many failed attempts. "
+                        f"Try again in {minutes_left} minutes."
+                    ),
                 )
 
         # Verify password
@@ -126,15 +131,22 @@ class AuthService:
             audit_logger.login(user.id, client_ip, success=False)
 
             if failed >= MAX_FAILED_ATTEMPTS:
-                lockout_until = (datetime.now(timezone.utc) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)).isoformat()
+                lockout_until = (
+                    datetime.now(timezone.utc) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+                ).isoformat()
                 from sqlalchemy import update
+
                 from app.models.user import User
+
                 await self.db.execute(
                     update(User).where(User.id == user.id).values(locked_until=lockout_until)
                 )
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail=f"Too many failed attempts. Account locked for {LOCKOUT_DURATION_MINUTES} minutes.",
+                    detail=(
+                        "Too many failed attempts. "
+                        f"Account locked for {LOCKOUT_DURATION_MINUTES} minutes."
+                    ),
                 )
 
             raise auth_error
@@ -191,7 +203,9 @@ class AuthService:
             logger.info("password_reset_requested", user_id=user.id)
 
         # Always return success — don't reveal if email exists
-        return MessageResponse(message="If an account with that email exists, you will receive a password reset link.")
+        return MessageResponse(
+            message="If an account with that email exists, you will receive a password reset link."
+        )
 
     async def reset_password(self, token: str, new_password: str) -> MessageResponse:
         """Reset a user's password using the token from their email."""
@@ -205,7 +219,9 @@ class AuthService:
         await self.repo.update_password(user.id, hash_password(new_password))
         audit_logger.password_changed(user.id)
 
-        return MessageResponse(message="Password reset successfully. You can now log in with your new password.")
+        return MessageResponse(
+            message="Password reset successfully. You can now log in with your new password."
+        )
 
     # ─── Internal ─────────────────────────────────────────────────────────────
 

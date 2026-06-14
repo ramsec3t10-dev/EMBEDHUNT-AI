@@ -3,10 +3,13 @@ EMBEDHUNT AI — Resume Model
 Phase A: Foundation
 """
 
-from typing import Optional
-from sqlalchemy import String, Boolean, Text, Float, Integer, Enum as SAEnum
-from sqlalchemy.orm import Mapped, mapped_column
 from enum import Enum
+from typing import Optional
+
+from sqlalchemy import Boolean
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy import Float, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import BaseModel
 
@@ -41,9 +44,9 @@ class Resume(BaseModel):
 
     # ─── Parsed Content ───────────────────────────────────────────────────────
     raw_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    parsed_skills: Mapped[Optional[str]] = mapped_column(Text, nullable=True)   # JSON list
+    parsed_skills: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON list
     parsed_experience: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
-    parsed_education: Mapped[Optional[str]] = mapped_column(Text, nullable=True)   # JSON
+    parsed_education: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON
     parsed_certifications: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     # ─── AI Fields ────────────────────────────────────────────────────────────
